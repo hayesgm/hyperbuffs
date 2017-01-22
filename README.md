@@ -30,10 +30,33 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     end
     ```
 
-  2. Add the following to `lib/web.ex` (or, alternatively, to each of your controllers)
+  2. Add the following to your controllers and views:
+
+    `web/controllers/page_controller.ex`
+
+    ```elixir
+    def MyApp.PageController do
+      use MyApp.Web, :controller
+      use HyperBuffs.Controller
+
+    end
+    ```
+
+    `web/views/page_view.ex`
+
+    ```elixir
+    def MyApp.PageView do
+      use MyApp.Web, :view
+      use HyperBuffs.View, defs: []
+
+    end
+    ```
+
+    *or*, to add HyperBuffs to all of your controllers:
 
     `lib/web.ex`
 
+    ```elixir
     defmodule MyApp.Web do
       # ...
       def controller do
@@ -46,10 +69,11 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
       def view do
         quote do
           # ...
-          use HyperBuffs.View # <- add this
+          use HyperBuffs.View, defs: [] # <- add this and your defs
         end
       end
     end
+    ```
 
   3. Add `protobufs` mime type to your config:
 
