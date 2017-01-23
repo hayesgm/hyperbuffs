@@ -19,11 +19,15 @@ defmodule ExampleTest do
       message Pong {
         string payload = 1;
       }
+
+      message Status {
+        string status = 1;
+      }
     """
   end
 
   defmodule ExampleView do
-    use HyperBuffs.View, defs: [Defs.Pong]
+    use HyperBuffs.View, defs: [Defs.Pong, Defs.Status]
   end
 
   defmodule ExampleController do
@@ -33,6 +37,11 @@ defmodule ExampleTest do
     @spec ping(Conn.t, %Defs.Ping{}) :: %Defs.Ping{}
     def ping(_conn, ping=%Defs.Ping{}) do
       Defs.Pong.new(payload: ping.payload)
+    end
+
+    @spec status(Conn.t) :: %Defs.Status{}
+    def status(_conn) do
+      Defs.Status.new(status: "green")
     end
   end
 
@@ -47,6 +56,7 @@ defmodule ExampleTest do
       pipe_through :api
 
       post "/ping", ExampleController, :ping, private: %{req: Defs.Ping, resp: Defs.Pong}
+      get "/status", ExampleController, :status, private: %{req: :none, resp: Defs.Status}
     end
   end
 
@@ -89,6 +99,30 @@ defmodule ExampleTest do
         |> Defs.Pong.decode
 
       assert pong.payload == "abc"
+    end
+  end
+
+  describe "/status" do
+    test "json out" do
+      conn = build_conn()
+        |> put_req_header("accept", "application/json")
+
+      conn = get conn, "/status"
+      json = json_response(conn, 200)
+
+      assert json["status"] == "green"
+    end
+
+    test "proto out" do
+      conn = build_conn()
+        |> put_req_header("accept", "application/x-protobuf")
+
+      conn = get conn, "/status"
+      status = conn
+        |> response(200)
+        |> Defs.Status.decode
+
+      assert status.status == "green"
     end
   end
 end
