@@ -41,16 +41,26 @@ defmodule HyperBuffs.Controller do
 
   Note: If params["_protobuf"] is set from PlugProtobufs, we will use that. Otherwise,
   we will create a new proto from the params themselves.
+
+  Finally, we can set `conn.private[:passthrough] = true` and receive the params as
+  well as the protobuf to our function call.
   """
   @spec call_action(Plug.Conn.t, atom(), atom()) :: Plug.Conn.t | struct() | {Plug.Conn.t, struct()}
   def call_action(conn=%Plug.Conn{private: private}, action_name, mod) do
+
+    # Should we pass params for extra request information?
+    maybe_params = case private[:passthrough] do
+      true -> [conn.params]
+      _ -> []
+    end
+
     case private[:req] do
       nil ->
         # `action(conn, params)`
         apply(mod, action_name, [conn, conn.params])
       :none ->
         # `action(conn)`
-        apply(mod, action_name, [conn])
+        apply(mod, action_name, [conn] ++ maybe_params)
       protobuf ->
         # `action(conn, proto)`
 
@@ -58,7 +68,7 @@ defmodule HyperBuffs.Controller do
         # TODO: What if params are unfetched?
         proto = conn.params["_protobuf"] || to_struct(protobuf, conn.params)
 
-        apply(mod, action_name, [conn, proto])
+        apply(mod, action_name, [conn, proto] ++ maybe_params)
     end
   end
 

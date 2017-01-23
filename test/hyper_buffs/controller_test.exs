@@ -13,6 +13,10 @@ defmodule HyperBuffs.ControllerTest do
     use Phoenix.Controller
     use HyperBuffs.Controller
 
+    def foo(conn, proto=%{__struct__: _struct}, params=%{}) do
+      %{conn | private: conn.private |> Map.put(:call, :proto_with_params) |> Map.put(:args, [conn, proto, params])}
+    end
+
     def foo(conn, proto=%{__struct__: _struct}) do
       %{conn | private: conn.private |> Map.put(:call, :proto) |> Map.put(:args, [conn, proto])}
     end
@@ -81,6 +85,18 @@ defmodule HyperBuffs.ControllerTest do
 
       assert next_conn.private[:call] == :proto
       assert next_conn.private[:args] == [conn, %MyDef{name: "G"}]
+    end
+
+    test "for a conn with [req: MyDef, pass_params: true]" do
+      conn =
+        build_conn(name: "G")
+        |> Plug.Conn.put_private(:req, MyDef)
+        |> Plug.Conn.put_private(:passthrough, true)
+
+      next_conn = TestController.action(conn, nil)
+
+      assert next_conn.private[:call] == :proto_with_params
+      assert next_conn.private[:args] == [conn, %MyDef{name: "G"}, %{"name" => "G"}]
     end
 
     test "for a conn with [req: MyDef] and proto" do

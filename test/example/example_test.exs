@@ -34,6 +34,11 @@ defmodule ExampleTest do
     def ping(_conn, ping=%Defs.Ping{}) do
       Defs.Pong.new(payload: ping.payload)
     end
+
+    @spec hop(Conn.t, %Defs.Ping{}, Conn.params) :: %Defs.Ping{}
+    def hop(_conn, ping=%Defs.Ping{}, params=%{}) do
+      Defs.Pong.new(payload: ping.payload <> "-" <> params["extra"])
+    end
   end
 
   defmodule ExampleRouter do
@@ -47,6 +52,7 @@ defmodule ExampleTest do
       pipe_through :api
 
       post "/ping", ExampleController, :ping, private: %{req: Defs.Ping, resp: Defs.Pong}
+      post "/hop", ExampleController, :hop, private: %{req: Defs.Ping, resp: Defs.Pong, passthrough: true}
     end
   end
 
@@ -66,6 +72,7 @@ defmodule ExampleTest do
 
   @endpoint ExampleEndpoint
 
+  # Ping is a simple input / output test with content negotiation
   describe "/ping" do
     test "json in / out" do
       conn = build_conn()
@@ -89,6 +96,33 @@ defmodule ExampleTest do
         |> Defs.Pong.decode
 
       assert pong.payload == "abc"
+    end
+  end
+
+  # Hop is an integration test around passing extra params
+  describe "/hop" do
+    test "json in / out" do
+      conn = build_conn()
+        |> put_req_header("content-type", "application/json")
+        |> put_req_header("accept", "application/json")
+
+      conn = post(conn, "/hop", "{\"payload\": \"abc\", \"extra\": \"secret\"}")
+      json = json_response(conn, 200)
+
+      assert json["payload"] == "abc-secret"
+    end
+
+    test "proto in / out" do
+      conn = build_conn()
+        |> put_req_header("content-type", "application/x-protobuf")
+        |> put_req_header("accept", "application/x-protobuf")
+
+      conn = post conn, "/hop?extra=secret", Defs.Ping.encode(Defs.Ping.new(payload: "abc"))
+      pong = conn
+        |> response(200)
+        |> Defs.Pong.decode
+
+      assert pong.payload == "abc-secret"
     end
   end
 end
