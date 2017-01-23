@@ -135,6 +135,7 @@ To use HyperBuffs, you'll need to define some protobufs, add the proto definitio
     ```elixir
     defmodule MyApp.HomeController do
       use MyApp.Web, :controller
+      use HyperBuffs.Controller
 
       def hello_world(_conn) do
         Defs.Loudspeaker.new(greeting: "Hello world!")
@@ -143,6 +144,15 @@ To use HyperBuffs, you'll need to define some protobufs, add the proto definitio
       def hello(_conn, name_tag) do
         Defs.Loudspeaker.new(greeting: "Hello #{name_tag.name}!")
       end
+    end
+    ```
+
+  4. Add desired protobuf definitions to your view:
+
+    ```elixir
+    defmodule MyApp.HomeView do
+      use MyApp.Web, :view
+      use HyperBuffs.View, defs: [Defs.Loudspeaker]
     end
     ```
 

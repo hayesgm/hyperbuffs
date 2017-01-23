@@ -31,6 +31,7 @@ defmodule HyperBuffs.Mixfile do
       {:phoenix, "~> 1.2.1"},
       {:plug_protobufs, github: "hayesgm/plug_protobufs"},
       {:exprotobuf, "~> 1.2"},
+      {:poison, ">= 0.0.0"}
     ]
   end
 end

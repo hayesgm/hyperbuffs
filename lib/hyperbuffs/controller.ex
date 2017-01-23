@@ -55,6 +55,7 @@ defmodule HyperBuffs.Controller do
         # `action(conn, proto)`
 
         # This can come from plug_protobufs or we can build it from params
+        # TODO: What if params are unfetched?
         proto = conn.params["_protobuf"] || to_struct(protobuf, conn.params)
 
         apply(mod, action_name, [conn, proto])
