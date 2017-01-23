@@ -5,7 +5,7 @@ HyperBuffs is an Elixir library which strongly connects Phoenix to Protobuf defi
 To use HyperBuffs, you will define your routes with a desired schema, e.g.
 
 ```elixir
-  post "/users", HomeController, :create, private: [req: Defs.Ping, resp: Defs.Pong]
+  post "/users", HomeController, :create, private: %{req: Defs.Ping, resp: Defs.Pong}
 ```
 
 and your controllers will speak Protobufs:
@@ -125,8 +125,8 @@ To use HyperBuffs, you'll need to define some protobufs, add the proto definitio
       plug Plug.Parsers, parsers: [Plug.Parsers.Protobuf] # allows Protobuf input
       plug :accepts, ["json", "proto"] # allows for Protobuf response
 
-      get "/hello_world", private: [resp: Defs.Loudspeaker]
-      post "/hello", private: [req: Defs.NameTag, resp: Defs.Loudspeaker]
+      get "/hello_world", private: %{req: :none, resp: Defs.Loudspeaker}
+      post "/hello", private: %{req: Defs.NameTag, resp: Defs.Loudspeaker}
     end
     ```
 
@@ -164,13 +164,13 @@ HyperBuffs is based around building strong types into your route definitions. Th
 
 ```elixir
   # Get with just output defined
-  get "/abc", MyController, :abc, private: [resp: Defs.ProtoOut]
+  get "/abc", MyController, :abc, private: %{req: :none, resp: Defs.ProtoOut}
 
   # Post with input and output
-  post "/abc", MyController, :abc, private: [req: Defs.ProtoIn, resp: Defs.ProtoOut]
+  post "/abc", MyController, :abc, private: %{req: Defs.ProtoIn, resp: Defs.ProtoOut}
 
   # Post with just output defined
-  post "/abc", MyController, :abc, private: [req: :none, resp: Defs.ProtoOut]
+  post "/abc", MyController, :abc, private: %{req: :none, resp: Defs.ProtoOut}
 ```
 
 Note: to be less intrusive, when defining routes, we differentiate between `:none` and not passing `req` or `resp`. If you do not define `req` or `resp` then HyperBuffs will ignore this route and it will follow Phoenix's standard processing (e.g. passing a `params` hash).
