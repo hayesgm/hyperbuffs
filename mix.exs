@@ -30,10 +30,10 @@ defmodule HyperBuffs.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:phoenix, "~> 1.2.1"},
-      {:plug_protobufs, "~> 0.1.0"},
+      {:phoenix, "~> 1.3"},
+      {:plug_protobufs, github: "hayesgm/plug_protobufs", branch: "hayesgm/new-protobufs"},
       {:ex_doc, ">= 0.0.0", only: :dev},
-      {:exprotobuf, "~> 1.2"},
+      {:protobuf, github: "hayesgm/protobuf-elixir", branch: "hayesgm/extensions"},
       {:poison, ">= 0.0.0"}
     ]
   end

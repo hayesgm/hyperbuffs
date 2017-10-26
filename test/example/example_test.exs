@@ -10,43 +10,32 @@ defmodule ExampleTest do
   use ExUnit.Case, async: true
   use Phoenix.ConnTest
 
-  defmodule Defs do
-    use Protobuf, """
-      message Ping {
-        string payload = 1;
-      }
-
-      message Pong {
-        string payload = 1;
-      }
-
-      message Status {
-        string status = 1;
-      }
-    """
-  end
+  # Require Protobuf definitions
+  Code.require_file("./test/example/example.pb.exs")
 
   defmodule ExampleView do
-    use HyperBuffs.View, defs: [Defs.Pong, Defs.Status]
+    use HyperBuffs.View, service: Defs.ExampleService
   end
 
   defmodule ExampleController do
     use Phoenix.Controller
     use HyperBuffs.Controller
 
-    @spec ping(Conn.t, %Defs.Ping{}) :: %Defs.Ping{}
-    def ping(_conn, ping=%Defs.Ping{}) do
-      Defs.Pong.new(payload: ping.payload)
+    @spec ping(Conn.t, %Defs.PingRequest{}) :: %Defs.PingResponse{}
+    def ping(_conn, ping=%Defs.PingRequest{}) do
+      Defs.PongResponse.new(payload: ping.payload)
     end
 
-    @spec status(Conn.t) :: %Defs.Status{}
-    def status(_conn) do
-      Defs.Status.new(status: "green")
+    @spec status(Conn.t, %Defs.StatusRequest{}) :: %Defs.StatusResponse{}
+    def status(_conn, %Defs.StatusRequest{}) do
+      Defs.StatusResponse.new(status: "green")
     end
   end
 
   defmodule ExampleRouter do
     use Phoenix.Router
+    use HyperBuffs.Router
+
     pipeline :api do
       plug Plug.Parsers, parsers: [:json, Plug.Parsers.Protobuf], pass: ["multipart/mixed", "application/json"], json_decoder: Poison
       plug :accepts, ~w(json proto)
@@ -55,8 +44,7 @@ defmodule ExampleTest do
     scope "/" do
       pipe_through :api
 
-      post "/ping", ExampleController, :ping, private: %{req: Defs.Ping, resp: Defs.Pong}
-      get "/status", ExampleController, :status, private: %{req: :none, resp: Defs.Status}
+      service ExampleController, Defs.ExampleService
     end
   end
 
@@ -93,7 +81,7 @@ defmodule ExampleTest do
         |> put_req_header("content-type", "application/x-protobuf")
         |> put_req_header("accept", "application/x-protobuf")
 
-      conn = post conn, "/ping", Defs.Ping.encode(Defs.Ping.new(payload: "abc"))
+      conn = post conn, "/ping", Defs.PingRequest.encode(Defs.PingRequest.new(payload: "abc"))
       pong = conn
         |> response(200)
         |> Defs.Pong.decode

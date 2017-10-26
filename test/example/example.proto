@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+import "annotations.proto";
+
+package Defs;
+
+message Status {
+	string status = 1;
+}
+
+message Ping {
+	string payload = 1;
+}
+
+message Pong {
+	string payload = 1;
+}
+
+service ExampleService {
+  rpc ping (PingRequest) returns (PongResponse) {
+  	option (google.api.http) = { post: "/ping" };
+  }
+
+  rpc status (StatusRequest) returns (StatusResponse) {
+  	option (google.api.http) = { get: "/status" };
+  }
+}
+
+message PingRequest {
+	Ping ping = 1;
+}
+
+message PongResponse {
+	Status status = 1;
+	Pong pong = 2;
+}
+
+message StatusRequest {}
+
+message StatusResponse {
+	Status status = 1;
+}

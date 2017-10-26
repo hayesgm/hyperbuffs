@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -eo pipefail
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Build protobuf
+protoc --proto_path="$DIR" --elixir_out=plugins=grpc:"$DIR" "$DIR/example.proto"
+
+# Move to exs so it's not compiled usually
+mv "$DIR/example.pb.ex" "$DIR/example.pb.exs"
