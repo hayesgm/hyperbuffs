@@ -44,7 +44,7 @@ defmodule ExampleTest do
     scope "/" do
       pipe_through :api
 
-      service ExampleController, Defs.ExampleService
+      service Defs.ExampleService, ExampleController
     end
   end
 

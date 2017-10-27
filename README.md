@@ -155,40 +155,45 @@ To use Hyperbuffs, you'll need to define some protobufs, add the service definit
     ```elixir
     syntax = "proto3";
 
-    message NameTag {
-      string name = 1;
-    }
+    import "annotations.proto";
 
-    message Loudspeaker {
-      string greeting = 1;
-    }
+    package MyApp;
 
-    service HelloService {
-      rpc hello (NameTag) returns (Loudspeaker) {
-        option (google.api.http) = { post: "/hello" };
+    service PingService {
+      rpc ping (Ping) returns (Pong) {
+        option (google.api.http) = { get: "/ping" };
       }
+    }
+
+    message Ping {}
+    message Pong {
+      uint32 timestamp = 1;
     }
     ```
 
-  2. Generate your protobuf definitions
+  2. Generate your protobuf definitions (replace `my_app` with your app or package name)
 
   ```bash
-  protoc --proto_path="./priv/proto" --proto_path="./deps/hyperbuffs/defs/priv/proto" --elixir_out="./lib/defs" "./priv/proto"
+  mkdir ./lib/my_app/proto
+  ```
+
+  ```bash
+  protoc --proto_path="./priv/proto" --proto_path="./deps/hyperbuffs/priv/proto" --elixir_out="./lib/my_app/proto" ./priv/proto/**
   ```
 
   Note: for an umbrella app, this would be:
 
   ```bash
-  protoc --proto_path="./priv/proto" --proto_path="../../deps/hyperbuffs/defs/priv/proto" --elixir_out="./lib/defs" "./priv/proto"
+  protoc --proto_path="./priv/proto" --proto_path="../../deps/hyperbuffs/priv/proto" --elixir_out="./lib/my_app/proto" ./priv/proto/**
   ```
 
   2. Add proto config to your desired routes:
 
     ```elixir
     defmodule MyApp.Router do
-      use Phoenix.Router
-      use Hyperbuffs.Router # <-- Add Hyperbuffs router
+      use MyApp, :router
 
+      # Add this section if you want to allow protobuf inputs and responses
       pipeline :api do
         plug Plug.Parsers, parsers: [Plug.Parsers.Protobuf] # allows Protobuf input
         plug :accepts, ["json", "proto"] # allows for Protobuf response
@@ -197,7 +202,7 @@ To use Hyperbuffs, you'll need to define some protobufs, add the service definit
       scope "/" do
         pipe_through :api
 
-        service HelloService, HelloController
+        service MyApp.PingService, StatusController
       end
     end
     ```
@@ -205,22 +210,30 @@ To use Hyperbuffs, you'll need to define some protobufs, add the service definit
   3. Build your actions in your controller:
 
     ```elixir
-    defmodule MyApp.HelloController do
-      use MyApp.Web, :controller
-      use Hyperbuffs.Controller # <-- add this
+    defmodule MyApp.StatusController do
+      use MyApp, :controller
 
-      def hello(_conn, name_tag) do
-        Defs.Loudspeaker.new(greeting: "Hello #{name_tag.name}!!!")
+      @doc """
+      Responds Pong to Ping.
+
+      ## Examples
+
+          iex> MyApp.StatusController.ping(%Plug.Conn{}, %MyApp.Ping{})
+          %MyApp.Pong{timestamp: 1508114537}
+      """
+      @spec ping(Plug.Conn.t, %MyApp.Ping{}) :: %MyApp.Pong{}
+      def ping(_conn, _ping) do
+        MyApp.Pong.new(timestamp: :os.system_time(:seconds))
       end
     end
     ```
 
-  4. Add protobuf definitions to your view:
+  4. Make sure you have a view for your controller:
 
     ```elixir
-    defmodule MyApp.HomeView do
-      use MyApp.Web, :view
-      use Hyperbuffs.View # <-- add this
+    defmodule MyApp.StatusView do
+      use MyApp, :view
+
     end
     ```
 

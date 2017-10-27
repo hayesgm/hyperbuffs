@@ -57,7 +57,7 @@ defmodule Hyperbuffs.Router do
     end
   end
 
-  defmacro service(controller, service, opts \\ []) do
+  defmacro service(service, controller, opts \\ []) do
     quote do
       routes = Hyperbuffs.Router.get_routes_for_service(unquote(service), unquote(opts))
 
