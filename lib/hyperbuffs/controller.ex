@@ -1,10 +1,10 @@
-defmodule HyperBuffs.Controller do
+defmodule Hyperbuffs.Controller do
 
   @doc """
   Wraps the `action/2` method for your controller so that your action methods
   can accept and respond on speaking in Proto objects.
 
-  Once you set private :req and :resp in your routes, HyperBuffs will change
+  Once you set private :req and :resp in your routes, Hyperbuffs will change
   the way we call your controller actions. See `call_action/3` below
   for details.
 
@@ -13,10 +13,10 @@ defmodule HyperBuffs.Controller do
   """
   defmacro __using__(_opts) do
     quote do
-      import HyperBuffs.Controller, only: [render_proto: 2]
+      import Hyperbuffs.Controller, only: [render_proto: 2]
 
       def action(conn, _options) do
-        resp = HyperBuffs.Controller.call_action(conn, action_name(conn), __MODULE__)
+        resp = Hyperbuffs.Controller.call_action(conn, action_name(conn), __MODULE__)
 
         case resp do
           next_conn=%Plug.Conn{} -> next_conn
@@ -33,7 +33,7 @@ defmodule HyperBuffs.Controller do
   This function will call the appropriate action in `mod` based
   on the request configuration in `conn.private[:req]`.
 
-  For HyperBuffs, instead of taking [conn, params] as input to our
+  For Hyperbuffs, instead of taking [conn, params] as input to our
   actions, we base the action definitions off of our route definitions.
 
   This function is responsible calling the action with the following params:
@@ -74,7 +74,7 @@ defmodule HyperBuffs.Controller do
 
   It's expected that you then define in your view matching calls,
   such as: `render("Elixir.Defs.MyProtobuf.proto", proto)` and
-  `render("Elixir.Defs.MyProtobuf.json", proto)`. See `HyperBuffs.View`
+  `render("Elixir.Defs.MyProtobuf.json", proto)`. See `Hyperbuffs.View`
   for helpers generating these view functions.
   """
   @spec render_proto(Plug.Conn.t, struct()) :: Plug.Conn.t

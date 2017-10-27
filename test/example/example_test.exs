@@ -1,7 +1,7 @@
 defmodule ExampleTest do
   @moduledoc """
   This is a very simple Phoenix that serves as an integration
-  test for HyperBuffs.
+  test for Hyperbuffs.
 
   We create a protobuf definitio, a view, controller, router
   and endpoint. We start the Phoenix app and run tests similar
@@ -14,12 +14,12 @@ defmodule ExampleTest do
   Code.require_file("./test/example/example.pb.exs")
 
   defmodule ExampleView do
-    use HyperBuffs.View
+    use Hyperbuffs.View
   end
 
   defmodule ExampleController do
     use Phoenix.Controller
-    use HyperBuffs.Controller
+    use Hyperbuffs.Controller
 
     @spec ping(Conn.t, %Defs.PingRequest{}) :: %Defs.PongResponse{}
     def ping(_conn, %Defs.PingRequest{ping: ping}) do
@@ -34,7 +34,7 @@ defmodule ExampleTest do
 
   defmodule ExampleRouter do
     use Phoenix.Router
-    use HyperBuffs.Router
+    use Hyperbuffs.Router
 
     pipeline :api do
       plug Plug.Parsers, parsers: [:json, Plug.Parsers.Protobuf], pass: ["multipart/mixed", "application/json"], json_decoder: Poison

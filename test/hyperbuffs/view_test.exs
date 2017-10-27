@@ -1,4 +1,4 @@
-defmodule HyperBuffs.ViewTest do
+defmodule Hyperbuffs.ViewTest do
   use ExUnit.Case, async: true
 
   defmodule Simple do
@@ -10,13 +10,13 @@ defmodule HyperBuffs.ViewTest do
   end
 
   defmodule TestView do
-    use HyperBuffs.View
+    use Hyperbuffs.View
   end
 
   describe "use TestView" do
     test "render proto" do
       assert TestView.render("protobuf.proto", %{protobuf: Simple, params: %Simple{name: "Bob"}})
-        == %{"encoded" => %HyperBuffs.ViewTest.Simple{name: "Bob"}}
+        == %{"encoded" => %Hyperbuffs.ViewTest.Simple{name: "Bob"}}
     end
 
     test "render json" do

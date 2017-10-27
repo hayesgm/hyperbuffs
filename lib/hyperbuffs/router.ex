@@ -1,4 +1,4 @@
-defmodule HyperBuffs.Router do
+defmodule Hyperbuffs.Router do
 
   @doc """
   Adds a new router function `service` which allows you to specify that
@@ -10,7 +10,7 @@ defmodule HyperBuffs.Router do
   """
   defmacro __using__(_opts) do
     quote do
-      import HyperBuffs.Router, only: [service: 2, service: 3]
+      import Hyperbuffs.Router, only: [service: 2, service: 3]
     end
   end
 
@@ -19,7 +19,7 @@ defmodule HyperBuffs.Router do
 
   ## Examples
 
-      iex> HyperBuffs.Router.get_routes_for_service(ExampleService, [])
+      iex> Hyperbuffs.Router.get_routes_for_service(ExampleService, [])
       [
         {:post, "/my/path", ExampleRequest, ExampleRequest, []},
         {:get, "/other/path", ExampleRequest, ExampleRequest, []}
@@ -59,10 +59,10 @@ defmodule HyperBuffs.Router do
 
   defmacro service(controller, service, opts \\ []) do
     quote do
-      routes = HyperBuffs.Router.get_routes_for_service(unquote(service), unquote(opts))
+      routes = Hyperbuffs.Router.get_routes_for_service(unquote(service), unquote(opts))
 
       for {action, name, path, request, response} <- routes do
-        HyperBuffs.Router.generate_route(action, name, path, request, response, unquote(controller))
+        Hyperbuffs.Router.generate_route(action, name, path, request, response, unquote(controller))
       end
     end
   end

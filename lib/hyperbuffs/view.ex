@@ -1,4 +1,4 @@
-defmodule HyperBuffs.View do
+defmodule Hyperbuffs.View do
 
   def render("proto", definition, params) do
     proto = struct(definition, Map.delete(params, :__struct__))
@@ -23,14 +23,14 @@ defmodule HyperBuffs.View do
 
   ```elixir
   def MyView do
-    use HyperBuffs.View
+    use Hyperbuffs.View
   end
   ```
   """
   defmacro __using__(opts) do
     quote do
       def render("protobuf." <> format, %{protobuf: protobuf, params: params}) do
-        HyperBuffs.View.render(format, protobuf, params)
+        Hyperbuffs.View.render(format, protobuf, params)
       end
     end
   end

@@ -1,8 +1,8 @@
-# HyperBuffs
+# Hyperbuffs
 
-HyperBuffs is an Elixir library which strongly connects Phoenix to Protobuf definitions. Based on content negotiation from incoming requests, your controllers will seamlessly accept and respond in either JSON or Protobuf (you can even accept one and return another). The goal is that your controller definitions are strongly typed and you give clients the option of how the data is encoded.
+Hyperbuffs is an Elixir library which strongly connects Phoenix to Protobuf definitions. Based on content negotiation from incoming requests, your controllers will seamlessly accept and respond in either JSON or Protobuf (you can even accept one and return another). The goal is that your controller definitions are strongly typed and you give clients the option of how the data is encoded.
 
-To use HyperBuffs, you will define your services with a desired RPC schema and connect those to your routes.
+To use Hyperbuffs, you will define your services with a desired RPC schema and connect those to your routes.
 
 ```protobuf
 service ExampleService {
@@ -41,52 +41,73 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:hyperbuffs, "~> 0.1.0"}]
+      [{:hyperbuffs, "~> 0.2.0"}]
     end
     ```
 
-  2. Add the following to your controllers and views:
+  2. Add the following to your controllers, views and router:
 
-    `web/controllers/page_controller.ex`
-
-    ```elixir
-    def MyApp.PageController do
-      use MyApp.Web, :controller
-      use HyperBuffs.Controller
-
-    end
-    ```
-
-    `web/views/page_view.ex`
+    `lib/my_app.ex`
 
     ```elixir
-    def MyApp.PageView do
-      use MyApp.Web, :view
-      use HyperBuffs.View
-
-    end
-    ```
-
-    *or*, to add HyperBuffs to all of your controllers:
-
-    `lib/web.ex`
-
-    ```elixir
-    defmodule MyApp.Web do
+    defmodule MyApp do
       # ...
       def controller do
         quote do
+          use Phoenix.Controller, namespace: MyApp
+          use Hyperbuffs.Controller # <- add this
           # ...
-          use HyperBuffs.Controller # <- add this
         end
       end
 
       def view do
         quote do
+          use Phoenix.View, root: "lib/my_app/templates",
+                            namespace: MyApp
+          use Hyperbuffs.View # <- add this
           # ...
-          use HyperBuffs.View # <- add this and your defs
         end
       end
+
+      def router do
+        quote do
+          use Phoenix.Router
+          use Hyperbuffs.Router # <- add this
+          # ...
+        end
+      end
+    end
+    ```
+
+    *or*, add Hyperbuffs to each controller, view and router:
+
+    `page_controller.ex`
+
+    ```elixir
+    def MyApp.PageController do
+      use MyApp, :controller
+      use Hyperbuffs.Controller
+
+    end
+    ```
+
+    `page_view.ex`
+
+    ```elixir
+    def MyApp.PageView do
+      use MyApp, :view
+      use Hyperbuffs.View
+
+    end
+    ```
+
+    `router.ex`
+
+    ```elixir
+    defmodule API.Router do
+      use API, :router
+      use Hyperbuffs.Router
+
     end
     ```
 
@@ -107,7 +128,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
 ## Getting Started
 
-To use HyperBuffs, you'll need to define some protobufs, add the service definitions to your routes, and then build your controller actions to take and return protobufs. The following walks through an example of this.
+To use Hyperbuffs, you'll need to define some protobufs, add the service definitions to your routes, and then build your controller actions to take and return protobufs. The following walks through an example of this.
 
   1. Add your protobuf definitions, e.g.:
 
@@ -142,7 +163,7 @@ To use HyperBuffs, you'll need to define some protobufs, add the service definit
     ```elixir
     defmodule MyApp.Router do
       use Phoenix.Router
-      use HyperBuffs.Router # <-- Add HyperBuffs router
+      use Hyperbuffs.Router # <-- Add Hyperbuffs router
 
       pipeline :api do
         plug Plug.Parsers, parsers: [Plug.Parsers.Protobuf] # allows Protobuf input
@@ -162,7 +183,7 @@ To use HyperBuffs, you'll need to define some protobufs, add the service definit
     ```elixir
     defmodule MyApp.HelloController do
       use MyApp.Web, :controller
-      use HyperBuffs.Controller # <-- add this
+      use Hyperbuffs.Controller # <-- add this
 
       def hello(_conn, name_tag) do
         Defs.Loudspeaker.new(greeting: "Hello #{name_tag.name}!!!")
@@ -175,13 +196,13 @@ To use HyperBuffs, you'll need to define some protobufs, add the service definit
     ```elixir
     defmodule MyApp.HomeView do
       use MyApp.Web, :view
-      use HyperBuffs.View # <-- add this
+      use Hyperbuffs.View # <-- add this
     end
     ```
 
 ### Actions
 
-Actions in HyperBuffs try to follow an RPC model where you have a declared input and you return a declared output. HyperBuffs will ensure that the input and output can be either JSON or Protobufs based on the Content-Type and Accept headers respectively.
+Actions in Hyperbuffs try to follow an RPC model where you have a declared input and you return a declared output. Hyperbuffs will ensure that the input and output can be either JSON or Protobufs based on the Content-Type and Accept headers respectively.
 
 That said, you still have access to `conn` and can render traditionally as well. Here's a few examples:
 
@@ -203,7 +224,7 @@ That said, you still have access to `conn` and can render traditionally as well.
   def my_action(conn, req=%Defs.SomeReq{}) do
     # Return just a conn
     conn
-    |> HyperBuffs.View.render_proto Defs.SomeResp.new(msg: "Hi #{req.name}")
+    |> Hyperbuffs.View.render_proto Defs.SomeResp.new(msg: "Hi #{req.name}")
   end
 ```
 

@@ -1,9 +1,9 @@
-defmodule HyperBuffs.Mixfile do
+defmodule Hyperbuffs.Mixfile do
   use Mix.Project
 
   def project do
     [app: :hyperbuffs,
-     version: "0.1.0",
+     version: "0.2.0",
      elixir: "~> 1.3",
      description: description(),
      package: package(),
@@ -40,7 +40,7 @@ defmodule HyperBuffs.Mixfile do
 
   defp description do
     """ 
-    HyperBuffs is an Elixir library which strongly connects Phoenix to Protobuf definitions. Based on content negotiation from incoming requests, your controllers will seamlessly accept and respond in either JSON or Protobuf.
+    Hyperbuffs is an Elixir library which strongly connects Phoenix to Protobuf definitions. Based on content negotiation from incoming requests, your controllers will seamlessly accept and respond in either JSON or Protobuf.
     """ 
   end
 

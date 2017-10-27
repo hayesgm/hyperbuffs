@@ -1,4 +1,4 @@
-defmodule HyperBuffs.ControllerTest do
+defmodule Hyperbuffs.ControllerTest do
   use ExUnit.Case, async: true
 
   setup_all do
@@ -18,7 +18,7 @@ defmodule HyperBuffs.ControllerTest do
 
   defmodule TestController do
     use Phoenix.Controller
-    use HyperBuffs.Controller
+    use Hyperbuffs.Controller
 
     def foo(conn, proto=%{__struct__: _struct}) do
       %{conn | private: conn.private |> Map.put(:call, :proto) |> Map.put(:args, [conn, proto])}
@@ -126,7 +126,7 @@ defmodule HyperBuffs.ControllerTest do
       assert next_conn.resp_body ==
         "Type: protobuf.other, " <>
         "Protobuf: nil, " <>
-        "Params: Elixir.HyperBuffs.ControllerTest.MyDef"
+        "Params: Elixir.Hyperbuffs.ControllerTest.MyDef"
     end
 
     test "for a def only" do
@@ -139,7 +139,7 @@ defmodule HyperBuffs.ControllerTest do
       assert next_conn.resp_body ==
         "Type: protobuf.other, " <>
         "Protobuf: nil, " <>
-        "Params: Elixir.HyperBuffs.ControllerTest.MyDef"
+        "Params: Elixir.Hyperbuffs.ControllerTest.MyDef"
     end
 
     test "for a def with protobuf only" do
@@ -151,19 +151,19 @@ defmodule HyperBuffs.ControllerTest do
       assert next_conn.private[:type] == nil
       assert next_conn.resp_body ==
         "Type: protobuf.other, " <>
-        "Protobuf: HyperBuffs.ControllerTest.MyDef, " <>
-        "Params: Elixir.HyperBuffs.ControllerTest.MyDef"
+        "Protobuf: Hyperbuffs.ControllerTest.MyDef, " <>
+        "Params: Elixir.Hyperbuffs.ControllerTest.MyDef"
     end
   end
 
   describe "render_proto/2" do
     test "it calls render function" do
-      conn = HyperBuffs.Controller.render_proto(build_conn([_format: "other"]), %MyDef{name: "G"})
+      conn = Hyperbuffs.Controller.render_proto(build_conn([_format: "other"]), %MyDef{name: "G"})
 
       assert conn.resp_body ==
         "Type: protobuf.other, " <>
         "Protobuf: nil, " <>
-        "Params: Elixir.HyperBuffs.ControllerTest.MyDef"
+        "Params: Elixir.Hyperbuffs.ControllerTest.MyDef"
     end
   end
 end
