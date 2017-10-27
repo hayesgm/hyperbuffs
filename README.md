@@ -45,7 +45,16 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     end
     ```
 
-  2. Add the following to your controllers, views and router:
+  2. Install `protobuf-elixir` on correct branch:
+
+    ```bash
+    cd ~
+    git clone https://github.com/tony612/protobuf-elixir
+    git checkout hayesgm/extensions
+    mix escript.install
+    ```
+
+  3. Add the following to your controllers, views and router:
 
     `lib/my_app.ex`
 
@@ -111,7 +120,16 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     end
     ```
 
-  3. Add `protobufs` mime type to your config:
+  4. Add `protobufs` mime type to your config:
+
+    `mix.exs`
+
+    defp deps do
+      # ...
+      {:mime, "~> 1.1"}
+    end
+
+    `config.exs`
 
     ```elixir
     config :mime, :types, %{
@@ -119,7 +137,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     }
     ```
 
-  4. After adding that, you'll need to recompile `mime`:
+  5. After adding that, you'll need to recompile `mime`:
 
     ```bash
     mix deps.clean mime --build
@@ -155,7 +173,13 @@ To use Hyperbuffs, you'll need to define some protobufs, add the service definit
   2. Generate your protobuf definitions
 
   ```bash
-  protoc --proto_path="./priv/proto" --elixir_out="./lib/defs" "./priv/proto"
+  protoc --proto_path="./priv/proto" --proto_path="./deps/hyperbuffs/defs/priv/proto" --elixir_out="./lib/defs" "./priv/proto"
+  ```
+
+  Note: for an umbrella app, this would be:
+
+  ```bash
+  protoc --proto_path="./priv/proto" --proto_path="../../deps/hyperbuffs/defs/priv/proto" --elixir_out="./lib/defs" "./priv/proto"
   ```
 
   2. Add proto config to your desired routes:
