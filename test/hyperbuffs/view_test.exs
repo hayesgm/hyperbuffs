@@ -10,17 +10,17 @@ defmodule HyperBuffs.ViewTest do
   end
 
   defmodule TestView do
-    use HyperBuffs.View, defs: [Simple]
+    use HyperBuffs.View
   end
 
   describe "use TestView" do
     test "render proto" do
-      assert TestView.render("Elixir.HyperBuffs.ViewTest.Simple.proto", %Simple{name: "Bob"})
+      assert TestView.render("protobuf.proto", %{protobuf: Simple, params: %Simple{name: "Bob"}})
         == %{"encoded" => %HyperBuffs.ViewTest.Simple{name: "Bob"}}
     end
 
     test "render json" do
-      assert TestView.render("Elixir.HyperBuffs.ViewTest.Simple.json", %Simple{name: "Bob"})
+      assert TestView.render("protobuf.json", %{protobuf: Simple, params: %Simple{name: "Bob"}})
         == %{name: "Bob"}
     end
   end

@@ -7,12 +7,15 @@ defmodule HyperBuffs.Controller do
   Once you set private :req and :resp in your routes, HyperBuffs will change
   the way we call your controller actions. See `call_action/3` below
   for details.
+
+  Note: it's considered acceptable and appropriate to override `action/2`, as
+        we are going.
   """
   defmacro __using__(_opts) do
     quote do
       import HyperBuffs.Controller, only: [render_proto: 2]
 
-      def action(conn, _) do
+      def action(conn, _options) do
         resp = HyperBuffs.Controller.call_action(conn, action_name(conn), __MODULE__)
 
         case resp do
@@ -56,19 +59,9 @@ defmodule HyperBuffs.Controller do
 
         # This can come from plug_protobufs or we can build it from params
         # TODO: What if params are unfetched?
-        proto = conn.params["_protobuf"] || to_struct(protobuf, conn.params)
+        proto = conn.params["_protobuf"] || protobuf.from_params(conn.params)
 
         apply(mod, action_name, [conn, proto])
-    end
-  end
-
-  defp to_struct(kind, attrs) do
-    struct = struct(kind)
-    Enum.reduce Map.to_list(struct), struct, fn {k, _}, acc ->
-      case Map.fetch(attrs, Atom.to_string(k)) do
-        {:ok, v} -> %{acc | k => v}
-        :error -> acc
-      end
     end
   end
 
@@ -86,6 +79,6 @@ defmodule HyperBuffs.Controller do
   """
   @spec render_proto(Plug.Conn.t, struct()) :: Plug.Conn.t
   def render_proto(conn, proto) do
-    Phoenix.Controller.render(conn, proto.__struct__, proto)
+    Phoenix.Controller.render(conn, :protobuf, %{protobuf: conn.private[:resp], params: proto})
   end
 end

@@ -2,18 +2,33 @@
 
 HyperBuffs is an Elixir library which strongly connects Phoenix to Protobuf definitions. Based on content negotiation from incoming requests, your controllers will seamlessly accept and respond in either JSON or Protobuf (you can even accept one and return another). The goal is that your controller definitions are strongly typed and you give clients the option of how the data is encoded.
 
-To use HyperBuffs, you will define your routes with a desired schema, e.g.
+To use HyperBuffs, you will define your services with a desired RPC schema and connect those to your routes.
 
-```elixir
-  post "/users", HomeController, :create, private: %{req: Defs.Ping, resp: Defs.Pong}
+```protobuf
+service ExampleService {
+  rpc ping (Ping) returns (Pong) {
+    option (google.api.http) = { post: "/ping" };
+  }
+
+  rpc status (StatusRequest) returns (StatusResponse) {
+    option (google.api.http) = { get: "/status" };
+  }
+}
 ```
 
-and your controllers will speak Protobufs:
+```elixir
+  service ExampleService, ExampleController
+```
+
+and your controllers will speak Protobuf:
 
 ```elixir
-  defmodule HomeController do
-    def create(_conn, ping=%Defs.Ping{}) do
-      Defs.Pong.new(payload: ping.payload)
+  defmodule ExampleController do
+
+    # Our actions now take a protobuf and return a protobuf
+    @spec create(%Plug.Conn{}, %Defs.Ping{}) :: %Defs.Pong
+    def create(_conn, %Defs.Ping{payload: payload}) do
+      Defs.Pong.new(payload: payload)
     end
   end
 ```
@@ -47,7 +62,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     ```elixir
     def MyApp.PageView do
       use MyApp.Web, :view
-      use HyperBuffs.View, defs: []
+      use HyperBuffs.View
 
     end
     ```
@@ -69,7 +84,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
       def view do
         quote do
           # ...
-          use HyperBuffs.View, defs: [] # <- add this and your defs
+          use HyperBuffs.View # <- add this and your defs
         end
       end
     end
@@ -92,21 +107,13 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
 ## Getting Started
 
-To use HyperBuffs, you'll need to define some protobufs, add the proto definitions to your routes, and then rebuild your requests to take and return protobufs. The following walks through an example of this.
+To use HyperBuffs, you'll need to define some protobufs, add the service definitions to your routes, and then build your controller actions to take and return protobufs. The following walks through an example of this.
 
   1. Add your protobuf definitions, e.g.:
 
-    `lib/defs.ex`
+    `priv/proto/services.proto`
 
     ```elixir
-    defmodule Defs do
-      use Protobuf, from: Path.wildcard(Path.expand("../definitions/**/*.proto", __DIR__))
-    end
-    ```
-
-    `definitions/example.proto`
-
-    ```protobuf
     syntax = "proto3";
 
     message NameTag {
@@ -116,64 +123,61 @@ To use HyperBuffs, you'll need to define some protobufs, add the proto definitio
     message Loudspeaker {
       string greeting = 1;
     }
+
+    service HelloService {
+      rpc hello (NameTag) returns (Loudspeaker) {
+        option (google.api.http) = { post: "/hello" };
+      }
+    }
     ```
+
+  2. Generate your protobuf definitions
+
+  ```bash
+  protoc --proto_path="./priv/proto" --elixir_out="./lib/defs" "./priv/proto"
+  ```
 
   2. Add proto config to your desired routes:
 
     ```elixir
     defmodule MyApp.Router do
-      plug Plug.Parsers, parsers: [Plug.Parsers.Protobuf] # allows Protobuf input
-      plug :accepts, ["json", "proto"] # allows for Protobuf response
+      use Phoenix.Router
+      use HyperBuffs.Router # <-- Add HyperBuffs router
 
-      get "/hello_world", private: %{req: :none, resp: Defs.Loudspeaker}
-      post "/hello", private: %{req: Defs.NameTag, resp: Defs.Loudspeaker}
+      pipeline :api do
+        plug Plug.Parsers, parsers: [Plug.Parsers.Protobuf] # allows Protobuf input
+        plug :accepts, ["json", "proto"] # allows for Protobuf response
+      end
+
+      scope "/" do
+        pipe_through :api
+
+        service HelloService, HelloController
+      end
     end
     ```
 
   3. Build your actions in your controller:
 
     ```elixir
-    defmodule MyApp.HomeController do
+    defmodule MyApp.HelloController do
       use MyApp.Web, :controller
-      use HyperBuffs.Controller
-
-      def hello_world(_conn) do
-        Defs.Loudspeaker.new(greeting: "Hello world!")
-      end
+      use HyperBuffs.Controller # <-- add this
 
       def hello(_conn, name_tag) do
-        Defs.Loudspeaker.new(greeting: "Hello #{name_tag.name}!")
+        Defs.Loudspeaker.new(greeting: "Hello #{name_tag.name}!!!")
       end
     end
     ```
 
-  4. Add desired protobuf definitions to your view:
+  4. Add protobuf definitions to your view:
 
     ```elixir
     defmodule MyApp.HomeView do
       use MyApp.Web, :view
-      use HyperBuffs.View, defs: [Defs.Loudspeaker]
+      use HyperBuffs.View # <-- add this
     end
     ```
-
-## Request and Response
-
-### Routes
-
-HyperBuffs is based around building strong types into your route definitions. The ultimate goal of this project is to be able to generate our route definitions from a proto file itself, so we want those routes to be as declarative as possible.
-
-```elixir
-  # Get with just output defined
-  get "/abc", MyController, :abc, private: %{req: :none, resp: Defs.ProtoOut}
-
-  # Post with input and output
-  post "/abc", MyController, :abc, private: %{req: Defs.ProtoIn, resp: Defs.ProtoOut}
-
-  # Post with just output defined
-  post "/abc", MyController, :abc, private: %{req: :none, resp: Defs.ProtoOut}
-```
-
-Note: to be less intrusive, when defining routes, we differentiate between `:none` and not passing `req` or `resp`. If you do not define `req` or `resp` then HyperBuffs will ignore this route and it will follow Phoenix's standard processing (e.g. passing a `params` hash).
 
 ### Actions
 

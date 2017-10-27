@@ -14,21 +14,21 @@ defmodule ExampleTest do
   Code.require_file("./test/example/example.pb.exs")
 
   defmodule ExampleView do
-    use HyperBuffs.View, service: Defs.ExampleService
+    use HyperBuffs.View
   end
 
   defmodule ExampleController do
     use Phoenix.Controller
     use HyperBuffs.Controller
 
-    @spec ping(Conn.t, %Defs.PingRequest{}) :: %Defs.PingResponse{}
-    def ping(_conn, ping=%Defs.PingRequest{}) do
-      Defs.PongResponse.new(payload: ping.payload)
+    @spec ping(Conn.t, %Defs.PingRequest{}) :: %Defs.PongResponse{}
+    def ping(_conn, %Defs.PingRequest{ping: ping}) do
+      Defs.PongResponse.new(pong: %Defs.Pong{payload: ping.payload})
     end
 
     @spec status(Conn.t, %Defs.StatusRequest{}) :: %Defs.StatusResponse{}
     def status(_conn, %Defs.StatusRequest{}) do
-      Defs.StatusResponse.new(status: "green")
+      Defs.StatusResponse.new(status: %Defs.Status{status: "green"})
     end
   end
 
@@ -70,10 +70,10 @@ defmodule ExampleTest do
         |> put_req_header("content-type", "application/json")
         |> put_req_header("accept", "application/json")
 
-      conn = post(conn, "/ping", "{\"payload\": \"abc\"}")
+      conn = post(conn, "/ping", "{\"ping\": {\"payload\": \"abc\"}}")
       json = json_response(conn, 200)
 
-      assert json["payload"] == "abc"
+      assert json["pong"]["payload"] == "abc"
     end
 
     test "proto in / out" do
@@ -81,12 +81,12 @@ defmodule ExampleTest do
         |> put_req_header("content-type", "application/x-protobuf")
         |> put_req_header("accept", "application/x-protobuf")
 
-      conn = post conn, "/ping", Defs.PingRequest.encode(Defs.PingRequest.new(payload: "abc"))
-      pong = conn
+      conn = post conn, "/ping", Defs.PingRequest.encode(Defs.PingRequest.new(ping: Defs.Ping.new(payload: "abc")))
+      pong_response = conn
         |> response(200)
-        |> Defs.Pong.decode
+        |> Defs.PongResponse.decode
 
-      assert pong.payload == "abc"
+      assert pong_response.pong.payload == "abc"
     end
   end
 
@@ -98,7 +98,7 @@ defmodule ExampleTest do
       conn = get conn, "/status"
       json = json_response(conn, 200)
 
-      assert json["status"] == "green"
+      assert json["status"]["status"] == "green"
     end
 
     test "proto out" do
@@ -108,9 +108,9 @@ defmodule ExampleTest do
       conn = get conn, "/status"
       status = conn
         |> response(200)
-        |> Defs.Status.decode
+        |> Defs.StatusResponse.decode
 
-      assert status.status == "green"
+      assert status.status.status == "green"
     end
   end
 end

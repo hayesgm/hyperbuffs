@@ -8,4 +8,4 @@
   "plug": {:hex, :plug, "1.4.3", "236d77ce7bf3e3a2668dc0d32a9b6f1f9b1f05361019946aae49874904be4aed", [], [{:cowboy, "~> 1.0.1 or ~> 1.1", [hex: :cowboy, repo: "hexpm", optional: true]}, {:mime, "~> 1.0", [hex: :mime, repo: "hexpm", optional: false]}], "hexpm"},
   "plug_protobufs": {:git, "https://github.com/hayesgm/plug_protobufs.git", "e91802cbcc8d31506cfc3f658c15506da9aef23b", [branch: "hayesgm/new-protobufs"]},
   "poison": {:hex, :poison, "3.1.0", "d9eb636610e096f86f25d9a46f35a9facac35609a7591b3be3326e99a0484665", [:mix], [], "hexpm"},
-  "protobuf": {:git, "https://github.com/hayesgm/protobuf-elixir.git", "6e5edf4e8c0d8a5d7a82ee92bb6a18effc274f52", [branch: "hayesgm/extensions"]}}
+  "protobuf": {:git, "https://github.com/hayesgm/protobuf-elixir.git", "e7627c0147bd9d16453fcc9620eaf14caa612b52", [branch: "hayesgm/extensions"]}}
