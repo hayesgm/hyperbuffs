@@ -27,19 +27,19 @@ defmodule Hyperbuffs.Router do
   """
   def get_routes_for_service(service, opts) do
     for rpc <- service.rpcs do
-      {name, request, response, service_opts} = rpc |> IO.inspect
+      {name, request, response, service_opts} = rpc
 
       request = case request do
-        {:stream, request} -> raise "Streaming is not currently supported"
+        {:stream, _request} -> raise "Streaming is not currently supported"
         _ -> request
       end
 
       response = case response do
-        {:stream, response} -> raise "Streaming is not currently supported"
+        {:stream, _response} -> raise "Streaming is not currently supported"
         _ -> response
       end
 
-      pattern = Enum.find(service_opts ++ opts, fn {k, v} ->
+      pattern = Enum.find(service_opts ++ opts, fn {k, _v} ->
         Enum.member?([:get, :put, :post, :delete, :patch], k)
       end)
 

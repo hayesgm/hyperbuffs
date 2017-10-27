@@ -237,9 +237,17 @@ To use Hyperbuffs, you'll need to define some protobufs, add the service definit
     end
     ```
 
+  5. That's all, run your app and view the endpoint.
+
+    ```bash
+    $ mix phx.server
+    $ curl localhost:4000/ping
+    {"timestamp":1509119708}
+    ```
+
 ### Actions
 
-Actions in Hyperbuffs try to follow an RPC model where you have a declared input and you return a declared output. Hyperbuffs will ensure that the input and output can be either JSON or Protobufs based on the Content-Type and Accept headers respectively.
+Actions in Hyperbuffs try to follow an RPC model where you have a declared input and you return a declared output. Hyperbuffs will ensure that the input and output can be either JSON or Protobufs based on the `Content-Type` and `Accept` headers respectively.
 
 That said, you still have access to `conn` and can render traditionally as well. Here's a few examples:
 

@@ -27,7 +27,7 @@ defmodule Hyperbuffs.View do
   end
   ```
   """
-  defmacro __using__(opts) do
+  defmacro __using__(_opts) do
     quote do
       def render("protobuf." <> format, %{protobuf: protobuf, params: params}) do
         Hyperbuffs.View.render(format, protobuf, params)
