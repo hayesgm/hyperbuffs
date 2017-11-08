@@ -1,5 +1,5 @@
 defmodule Defs.Status do
-  use Protobuf, syntax: :proto3
+  use Protobufex, syntax: :proto3
 
   @type t :: %__MODULE__{
     status: String.t
@@ -10,7 +10,7 @@ defmodule Defs.Status do
 end
 
 defmodule Defs.Ping do
-  use Protobuf, syntax: :proto3
+  use Protobufex, syntax: :proto3
 
   @type t :: %__MODULE__{
     payload: String.t
@@ -21,7 +21,7 @@ defmodule Defs.Ping do
 end
 
 defmodule Defs.Pong do
-  use Protobuf, syntax: :proto3
+  use Protobufex, syntax: :proto3
 
   @type t :: %__MODULE__{
     payload: String.t
@@ -32,7 +32,7 @@ defmodule Defs.Pong do
 end
 
 defmodule Defs.PingRequest do
-  use Protobuf, syntax: :proto3
+  use Protobufex, syntax: :proto3
 
   @type t :: %__MODULE__{
     ping: Defs.Ping.t
@@ -43,7 +43,7 @@ defmodule Defs.PingRequest do
 end
 
 defmodule Defs.PongResponse do
-  use Protobuf, syntax: :proto3
+  use Protobufex, syntax: :proto3
 
   @type t :: %__MODULE__{
     status: Defs.Status.t,
@@ -56,14 +56,14 @@ defmodule Defs.PongResponse do
 end
 
 defmodule Defs.StatusRequest do
-  use Protobuf, syntax: :proto3
+  use Protobufex, syntax: :proto3
 
   defstruct []
 
 end
 
 defmodule Defs.StatusResponse do
-  use Protobuf, syntax: :proto3
+  use Protobufex, syntax: :proto3
 
   @type t :: %__MODULE__{
     status: Defs.Status.t
@@ -74,7 +74,7 @@ defmodule Defs.StatusResponse do
 end
 
 defmodule Defs.ExampleService do
-  use Protobuf.Service
+  use Protobufex.Service
 
   rpc :ping, Defs.PingRequest, Defs.PongResponse, post: "/ping"
   rpc :status, Defs.StatusRequest, Defs.StatusResponse, get: "/status"

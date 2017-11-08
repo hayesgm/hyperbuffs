@@ -31,9 +31,9 @@ defmodule Hyperbuffs.Mixfile do
   defp deps do
     [
       {:phoenix, "~> 1.3"},
-      {:plug_protobufs, github: "hayesgm/plug_protobufs", branch: "hayesgm/new-protobufs"},
+      {:plug_protobufs, github: "hayesgm/plug_protobufs", branch: "hayesgm/new-protobufs-ex"},
       {:ex_doc, ">= 0.0.0", only: :dev},
-      {:protobuf, github: "hayesgm/protobuf-elixir", branch: "hayesgm/extensions"},
+      {:protobufex, github: "hayesgm/protobuf-elixir", branch: "hayesgm/extensions-ex"},
       {:poison, ">= 0.0.0"}
     ]
   end
