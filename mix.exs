@@ -3,8 +3,8 @@ defmodule Hyperbuffs.Mixfile do
 
   def project do
     [app: :hyperbuffs,
-     version: "0.2.1",
-     elixir: "~> 1.3",
+     version: "0.2.2",
+     elixir: "~> 1.7",
      description: description(),
      package: package(),
      build_embedded: Mix.env == :prod,
@@ -31,8 +31,8 @@ defmodule Hyperbuffs.Mixfile do
   defp deps do
     [
       {:phoenix, "~> 1.3"},
-      {:plug_protobufs, github: "hayesgm/plug_protobufs", branch: "hayesgm/new-protobufs-ex"},
-      {:ex_doc, ">= 0.0.0", only: :dev},
+      {:plug_protobufs, "~> 0.1.1"},
+      {:ex_doc, "~> 0.19.1", only: :dev},
       {:protobuf_ex, "~> 0.5.0"},
       {:poison, ">= 0.0.0"}
     ]
