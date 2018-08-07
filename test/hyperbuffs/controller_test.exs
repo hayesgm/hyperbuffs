@@ -6,7 +6,7 @@ defmodule Hyperbuffs.ControllerTest do
   end
 
   defmodule MyDef do
-    use Protobufex, syntax: :proto3
+    use Protobuf, syntax: :proto3
 
     @type t :: %__MODULE__{
       name: String.t
