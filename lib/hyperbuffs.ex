@@ -1,3 +1,3 @@
-defmodule HyperBuffs do
+defmodule Hyperbuffs do
 
 end

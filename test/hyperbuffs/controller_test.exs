@@ -1,4 +1,4 @@
-defmodule HyperBuffs.ControllerTest do
+defmodule Hyperbuffs.ControllerTest do
   use ExUnit.Case, async: true
 
   setup_all do
@@ -6,12 +6,19 @@ defmodule HyperBuffs.ControllerTest do
   end
 
   defmodule MyDef do
-    defstruct [name: ""]
+    use Protobuf, syntax: :proto3
+
+    @type t :: %__MODULE__{
+      name: String.t
+    }
+    defstruct [:name]
+
+    field :name, 1, type: :string
   end
 
   defmodule TestController do
     use Phoenix.Controller
-    use HyperBuffs.Controller
+    use Hyperbuffs.Controller
 
     def foo(conn, proto=%{__struct__: _struct}) do
       %{conn | private: conn.private |> Map.put(:call, :proto) |> Map.put(:args, [conn, proto])}
@@ -39,15 +46,16 @@ defmodule HyperBuffs.ControllerTest do
   end
 
   defmodule TestView do
-    def render(type, params) do
-      "Type: #{type}, Params: #{params.__struct__}"
+    def render(type, %{protobuf: protobuf, params: params}) do
+      "Type: #{type}, Protobuf: #{inspect protobuf}, Params: #{params.__struct__}"
     end
   end
 
-  def build_conn(params, method \\ :foo) do
+  def build_conn(params, method \\ :foo, resp \\ nil) do
     Plug.Test.conn(:get, "/foo", Enum.into(params, %{}))
       |> Plug.Conn.put_private(:phoenix_controller, TestController)
       |> Plug.Conn.put_private(:phoenix_action, method)
+      |> Plug.Conn.put_private(:resp, resp)
       |> Phoenix.Controller.put_view(TestView)
   end
 
@@ -116,8 +124,9 @@ defmodule HyperBuffs.ControllerTest do
 
       assert next_conn.private[:type] == :conn_plus_def
       assert next_conn.resp_body ==
-        "Type: Elixir.HyperBuffs.ControllerTest.MyDef.other, " <>
-        "Params: Elixir.HyperBuffs.ControllerTest.MyDef"
+        "Type: protobuf.other, " <>
+        "Protobuf: nil, " <>
+        "Params: Elixir.Hyperbuffs.ControllerTest.MyDef"
     end
 
     test "for a def only" do
@@ -128,18 +137,33 @@ defmodule HyperBuffs.ControllerTest do
 
       assert next_conn.private[:type] == nil
       assert next_conn.resp_body ==
-        "Type: Elixir.HyperBuffs.ControllerTest.MyDef.other, " <>
-        "Params: Elixir.HyperBuffs.ControllerTest.MyDef"
+        "Type: protobuf.other, " <>
+        "Protobuf: nil, " <>
+        "Params: Elixir.Hyperbuffs.ControllerTest.MyDef"
+    end
+
+    test "for a def with protobuf only" do
+      conn =
+        build_conn([name: "G", _format: "other"], :bar_3, MyDef)
+
+      next_conn = TestController.action(conn, nil)
+
+      assert next_conn.private[:type] == nil
+      assert next_conn.resp_body ==
+        "Type: protobuf.other, " <>
+        "Protobuf: Hyperbuffs.ControllerTest.MyDef, " <>
+        "Params: Elixir.Hyperbuffs.ControllerTest.MyDef"
     end
   end
 
   describe "render_proto/2" do
     test "it calls render function" do
-      conn = HyperBuffs.Controller.render_proto(build_conn([_format: "other"]), %MyDef{name: "G"})
+      conn = Hyperbuffs.Controller.render_proto(build_conn([_format: "other"]), %MyDef{name: "G"})
 
       assert conn.resp_body ==
-        "Type: Elixir.HyperBuffs.ControllerTest.MyDef.other, " <>
-        "Params: Elixir.HyperBuffs.ControllerTest.MyDef"
+        "Type: protobuf.other, " <>
+        "Protobuf: nil, " <>
+        "Params: Elixir.Hyperbuffs.ControllerTest.MyDef"
     end
   end
 end

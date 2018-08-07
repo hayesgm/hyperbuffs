@@ -1,52 +1,41 @@
 defmodule ExampleTest do
   @moduledoc """
   This is a very simple Phoenix that serves as an integration
-  test for HyperBuffs.
+  test for Hyperbuffs.
 
-  We create a protobuf definitio, a view, controller, router
+  We create a protobuf definition, a view, controller, router
   and endpoint. We start the Phoenix app and run tests similar
   to controller tests in Phoenix apps.
   """
   use ExUnit.Case, async: true
   use Phoenix.ConnTest
 
-  defmodule Defs do
-    use Protobuf, """
-      message Ping {
-        string payload = 1;
-      }
-
-      message Pong {
-        string payload = 1;
-      }
-
-      message Status {
-        string status = 1;
-      }
-    """
-  end
+  # Require Protobuf definitions
+  Code.require_file("./test/example/example.pb.exs")
 
   defmodule ExampleView do
-    use HyperBuffs.View, defs: [Defs.Pong, Defs.Status]
+    use Hyperbuffs.View
   end
 
   defmodule ExampleController do
     use Phoenix.Controller
-    use HyperBuffs.Controller
+    use Hyperbuffs.Controller
 
-    @spec ping(Conn.t, %Defs.Ping{}) :: %Defs.Ping{}
-    def ping(_conn, ping=%Defs.Ping{}) do
-      Defs.Pong.new(payload: ping.payload)
+    @spec ping(Conn.t, %Defs.PingRequest{}) :: %Defs.PongResponse{}
+    def ping(_conn, %Defs.PingRequest{ping: ping}) do
+      Defs.PongResponse.new(pong: %Defs.Pong{payload: ping.payload})
     end
 
-    @spec status(Conn.t) :: %Defs.Status{}
-    def status(_conn) do
-      Defs.Status.new(status: "green")
+    @spec status(Conn.t, %Defs.StatusRequest{}) :: %Defs.StatusResponse{}
+    def status(_conn, %Defs.StatusRequest{}) do
+      Defs.StatusResponse.new(status: %Defs.Status{status: "green"})
     end
   end
 
   defmodule ExampleRouter do
     use Phoenix.Router
+    use Hyperbuffs.Router
+
     pipeline :api do
       plug Plug.Parsers, parsers: [:json, Plug.Parsers.Protobuf], pass: ["multipart/mixed", "application/json"], json_decoder: Poison
       plug :accepts, ~w(json proto)
@@ -55,8 +44,7 @@ defmodule ExampleTest do
     scope "/" do
       pipe_through :api
 
-      post "/ping", ExampleController, :ping, private: %{req: Defs.Ping, resp: Defs.Pong}
-      get "/status", ExampleController, :status, private: %{req: :none, resp: Defs.Status}
+      service Defs.ExampleService, ExampleController
     end
   end
 
@@ -82,10 +70,10 @@ defmodule ExampleTest do
         |> put_req_header("content-type", "application/json")
         |> put_req_header("accept", "application/json")
 
-      conn = post(conn, "/ping", "{\"payload\": \"abc\"}")
+      conn = post(conn, "/ping", "{\"ping\": {\"payload\": \"abc\"}}")
       json = json_response(conn, 200)
 
-      assert json["payload"] == "abc"
+      assert json["pong"]["payload"] == "abc"
     end
 
     test "proto in / out" do
@@ -93,12 +81,12 @@ defmodule ExampleTest do
         |> put_req_header("content-type", "application/x-protobuf")
         |> put_req_header("accept", "application/x-protobuf")
 
-      conn = post conn, "/ping", Defs.Ping.encode(Defs.Ping.new(payload: "abc"))
-      pong = conn
+      conn = post conn, "/ping", Defs.PingRequest.encode(Defs.PingRequest.new(ping: Defs.Ping.new(payload: "abc")))
+      pong_response = conn
         |> response(200)
-        |> Defs.Pong.decode
+        |> Defs.PongResponse.decode
 
-      assert pong.payload == "abc"
+      assert pong_response.pong.payload == "abc"
     end
   end
 
@@ -110,7 +98,7 @@ defmodule ExampleTest do
       conn = get conn, "/status"
       json = json_response(conn, 200)
 
-      assert json["status"] == "green"
+      assert json["status"]["status"] == "green"
     end
 
     test "proto out" do
@@ -120,9 +108,9 @@ defmodule ExampleTest do
       conn = get conn, "/status"
       status = conn
         |> response(200)
-        |> Defs.Status.decode
+        |> Defs.StatusResponse.decode
 
-      assert status.status == "green"
+      assert status.status.status == "green"
     end
   end
 end
