@@ -41,16 +41,16 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:hyperbuffs, "~> 0.2.0"}]
+      [{:hyperbuffs, "~> 0.2.1"}]
     end
     ```
 
-  2. Install `protobuf-elixir` on correct branch:
+  2. Install `protoc-gen-elixir` from `protobuf-ex`:
 
     ```bash
     cd ~
-    git clone https://github.com/tony612/protobuf-elixir
-    git checkout hayesgm/extensions
+    git clone https://github.com/hayesgm/protobuf-ex.git
+    cd protobuf-ex
     mix escript.install
     ```
 

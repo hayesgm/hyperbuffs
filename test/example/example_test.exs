@@ -3,7 +3,7 @@ defmodule ExampleTest do
   This is a very simple Phoenix that serves as an integration
   test for Hyperbuffs.
 
-  We create a protobuf definitio, a view, controller, router
+  We create a protobuf definition, a view, controller, router
   and endpoint. We start the Phoenix app and run tests similar
   to controller tests in Phoenix apps.
   """
