@@ -1,4 +1,7 @@
 # 0.2.2
+* Upgrade dependencies (plug_protobufs, protobuf_ex)
+* Upgrade to Jason as the default encoder
+# 0.2.2
 * Upgrade dependencies (plug_protobufs)
 * Upgrade to Elixir 1.7
 # 0.2.1

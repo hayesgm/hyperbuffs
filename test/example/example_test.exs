@@ -10,9 +10,6 @@ defmodule ExampleTest do
   use ExUnit.Case, async: true
   use Phoenix.ConnTest
 
-  # Require Protobuf definitions
-  Code.require_file("./test/example/example.pb.exs")
-
   defmodule ExampleView do
     use Hyperbuffs.View
   end
@@ -37,7 +34,7 @@ defmodule ExampleTest do
     use Hyperbuffs.Router
 
     pipeline :api do
-      plug Plug.Parsers, parsers: [:json, Plug.Parsers.Protobuf], pass: ["multipart/mixed", "application/json"], json_decoder: Poison
+      plug Plug.Parsers, parsers: [Plug.Parsers.JSON, Plug.Parsers.Protobuf], pass: ["multipart/mixed", "application/json"], json_decoder: Jason
       plug :accepts, ~w(json proto)
     end
 
@@ -55,8 +52,6 @@ defmodule ExampleTest do
   end
 
   setup_all do
-    Application.put_env(:phoenix, :format_encoders, [])
-    Application.put_env(:phoenix, :filter_parameters, [])
     ExampleEndpoint.start_link()
 
     :ok

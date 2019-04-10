@@ -3,14 +3,17 @@ defmodule Hyperbuffs.Mixfile do
 
   def project do
     [app: :hyperbuffs,
-     version: "0.2.2",
+     version: "0.2.3",
      elixir: "~> 1.7",
      description: description(),
      package: package(),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     elixirc_paths: elixirc_paths(Mix.env),
      deps: deps()]
   end
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_),     do: ["lib"]
 
   # Configuration for the OTP application
   #
@@ -30,11 +33,11 @@ defmodule Hyperbuffs.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:phoenix, "~> 1.3"},
-      {:plug_protobufs, "~> 0.1.1"},
+      {:phoenix, "~> 1.4.3"},
+      {:plug_protobufs, "~> 0.1.4"},
       {:ex_doc, "~> 0.19.1", only: :dev},
-      {:protobuf_ex, "~> 0.5.0"},
-      {:poison, ">= 0.0.0"}
+      {:protobuf_ex, "~> 0.6.0"},
+      {:jason, "~> 1.1.2"}
     ]
   end
 

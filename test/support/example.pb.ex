@@ -58,7 +58,7 @@ end
 defmodule Defs.StatusRequest do
   use Protobuf, syntax: :proto3
 
-  defstruct []
+defstruct []
 
 end
 
